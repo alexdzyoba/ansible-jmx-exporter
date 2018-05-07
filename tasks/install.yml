@@ -1,0 +1,47 @@
+---
+
+- name: Ensure jmx_exporter group
+  group:
+    name: "{{ jmx_exporter_group }}"
+    system: yes
+    state: present
+
+- name: Ensure jmx_exporter user
+  user:
+    name: "{{ jmx_exporter_user }}"
+    group: "{{ jmx_exporter_group }}"
+    system: yes
+    shell: /usr/sbin/nologin
+    createhome: no
+
+- name: Ensure skeleton paths
+  file:
+    dest: "{{ item }}"
+    owner: "{{ jmx_exporter_user }}"
+    group: "{{ jmx_exporter_user }}"
+    state: directory
+  with_items:
+    - "{{ jmx_exporter_root_path }}"
+    - "{{ jmx_exporter_conf_path }}"
+
+- name: Download binary
+  get_url:
+    url: "{{ jmx_exporter_url }}"
+    dest: /tmp
+
+- name: Copy binary
+  copy:
+    src: "/tmp/{{ jmx_exporter_jar_with_version }}"
+    dest: "{{ jmx_exporter_root_path }}/{{ jmx_exporter_jar_with_version }}"
+    owner: "{{ jmx_exporter_user }}"
+    group: "{{ jmx_exporter_group }}"
+    remote_src: True
+    mode: 0755
+
+- name: Symlink short jar name
+  file:
+    src: "{{ jmx_exporter_root_path }}/{{ jmx_exporter_jar_with_version }}"
+    dest: "{{ jmx_exporter_root_path }}/{{ jmx_exporter_jar }}"
+    owner: "{{ jmx_exporter_user }}"
+    group: "{{ jmx_exporter_group }}"
+    state: link

@@ -1,0 +1,10 @@
+---
+
+- name: Copy exporter config
+  template:
+    src: "{{ item }}"
+    dest: "{{ jmx_exporter_conf_path }}/{{ item | basename }}"
+    owner: "{{ jmx_exporter_user }}"
+    group: "{{ jmx_exporter_group }}"
+    mode: 0644
+  with_fileglob: "files/{{ jmx_exporter_service }}/*"
